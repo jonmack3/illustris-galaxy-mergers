@@ -4298,10 +4298,10 @@ def createpubplots():
     print('Running create_pub_plots')
     
     plt.rcParams.update({'font.size': 12})
-    # createfvmplots()
-    # createfvm_mlt_plot()
+    createfvmplots()
+    createfvm_mlt_plot()
     createfvmratioplots()
-    # create_dtplots()
+    create_dtplots()
     
 def test():
     """
