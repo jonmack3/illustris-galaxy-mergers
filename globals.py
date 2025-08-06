@@ -1,8 +1,20 @@
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-multiple_mergers.py global constants
-Created on Wed Jul 26 00:19:20 2017
-@author: ijkl
+Title: Multiple Galaxy Mergers in Illustris/TNG
+Author: Jonathan Mack
+Created: 2016 Jun 23
+Last modified: 2025 Aug 6
+Code names: config.py, globals.py, multiple_mergers.py
+Language: Python
+License: MIT
+Code tested under the following operating systems:  Unix, Linux
+Description of input data: Illustris(TNG) simulation merger data
+Description of output data: various data/plots, in Gyr
+System requirements: none notable
+Calls to external routines: none notable
+Additional comments: This file contains constants for use in
+multiple_mergers.py.
 """
 
 # constants used to convert between t and z

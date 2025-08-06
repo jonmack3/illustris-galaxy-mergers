@@ -1,13 +1,22 @@
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Multiple mergers.py configuration variables.
-Created on Mon Jul 3 01:20:03 2017
-@author: Jonathan Mack
-
-Notes
------
-All functions beyond setmergers are designed to be executed one per
-each combination of ilnum and snapnum, with all other parameters combined.
+Title: Multiple Galaxy Mergers in Illustris/TNG
+Author: Jonathan Mack
+Created: 2016 Jun 23
+Last modified: 2025 Aug 6
+Code names: config.py, globals.py, multiple_mergers.py
+Language: Python
+License: MIT
+Code tested under the following operating systems:  Unix, Linux
+Description of input data: Illustris(TNG) simulation merger data
+Description of output data: various data/plots, in Gyr
+System requirements: none notable
+Calls to external routines: none notable
+Additional comments: This file contains configuration parameters for use in
+multiple_mergers.py. All non-plotting functions beyond setmergers are designed
+to be executed one per each combination of ilnum and snapnum, with all other
+parameters combined.
 """
 
 functions = {0: 'setmergers',
@@ -29,7 +38,7 @@ functions = {0: 'setmergers',
              16: 'test'}
 
 testcfg = 0
-fnum = 16
+fnum = 2
 
 if not testcfg:
     debug = 0
@@ -44,10 +53,10 @@ if not testcfg:
     ilnums = [3]
     # ilnums_mlt = [3, 100]
     ilnums_mlt = [1, 3, 100, 300]
-    snapnumsOG = [127]
+    snapnumsOG = [68]
     # snapnumsOGmlt = [68]
     snapnumsOGmlt = [49, 54, 60, 64, 68, 75, 85, 103, 120, 127]
-    snapnumsTNG = []
+    snapnumsTNG = [33]
     # snapnumsTNGmlt = [33]
     snapnumsTNGmlt = [17, 21, 25, 29, 33, 40, 50, 67, 84, 91]
     # mu_maxes = [4]
@@ -90,8 +99,8 @@ else:
     # Tfacs = [0.5, 1, 2]
 
 # setmergers only parameters
-ilnum = 100
-snapnum = 31
+ilnum = 3
+snapnum = 68
 mu_max = 4
 virtualprog = 1
 SubLink_gal = 1
