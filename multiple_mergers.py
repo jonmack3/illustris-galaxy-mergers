@@ -125,6 +125,8 @@ def main(argv):
         setfmin()
     elif cfg.functions[fnum] == 'createfvmplots':
         createfvmplots()
+    elif cfg.functions[fnum] == 'createfvm_mlt_plot':
+        createfvm_mlt_plot()
     elif cfg.functions[fnum] == 'createfvmratioplots':
         createfvmratioplots()
     elif cfg.functions[fnum] == 'create_single_dtplots':
@@ -132,7 +134,9 @@ def main(argv):
     elif cfg.functions[fnum] == 'create_all_dt2dplot':
         create_all_dt2dplot()
     elif cfg.functions[fnum] == 'createpubplots':
-            createpubplots()
+        createpubplots()
+    elif cfg.functions[fnum] == 'analyze_undercount':
+        analyze_undercount()
     elif cfg.functions[fnum] == 'test':
         test()
     if cfg.debug == 1: logging.shutdown()
@@ -1030,7 +1034,10 @@ def setfs():
     """
     Get merger fraction info, store in files.
     """
-    print(f'Running setfs subhalostart {cfg.subhalostart} subhalo_end '
+    print(f'Running setfs, at ilnums {cfg.ilnums_mlt} snapnums OG '
+          f'{cfg.snapnumsOG} snapnumsTNG {cfg.snapnumsTNG} mu_maxes '
+          f'{cfg.mu_maxes} vs {cfg.virtualprogs} gs {cfg.SubLink_gals} Tfacs '
+          f'{cfg.Tfacs} subhalostart {cfg.subhalostart} subhalo_end '
           f'{cfg.subhalo_end}')
 
     # get aggregate data
@@ -1157,7 +1164,7 @@ def setfs():
             i_fcn += 1
 
             for n, o in it.product(cfg.virtualprogs, cfg.SubLink_gals):
-                print(f'ilnum {ilnum} snapnum {j} mu_max {k} '
+                print(f'Getting data at ilnum {ilnum} snapnum {j} mu_max {k} '
                       f'virtualprogs {n} SubLink_gals {o} Tref {p} Tfac {u}')
                 if cfg.debug == 1:
                     logging.debug(f'ilnum {ilnum} snapnum {j} mu_max {k} '
@@ -2721,7 +2728,8 @@ def createfvmplot(ilnum, snapnum, mu_min, mu_max, virtualprog, SubLink_gal,
     print(f'Creating f vs m plot at ilnum {ilnum} snapnum {snapnum} '
           f'mu_min {mu_min} mu_max {mu_max} virtualprog {virtualprog} '
           f'SubLink_gal {SubLink_gal} Tref {Tref} Tfac {Tfac} '
-          f'subhalostart {cfg.subhalostart} subhalo_end {cfg.subhalo_end}')
+          f'subhalostart {cfg.subhalostart} subhalo_end {cfg.subhalo_end} '
+          f'type {subset}')
 
     dictnum, _, ilrun, _, _, _ = get_run_info(ilnum)
     numbins = len(m_ctrs)
@@ -2919,31 +2927,16 @@ def createfvmplot(ilnum, snapnum, mu_min, mu_max, virtualprog, SubLink_gal,
                    borderaxespad=0.0, prop={'size':12}, handletextpad=0.2)
     else:
         suptxt = 'Merger Fraction vs Mass'
+        if platform.node().startswith('jupyter'):
+            figtxt_lcn = 0.79
+        else:
+            figtxt_lcn = 0.77
         if subset == 'a':
             suptxt = suptxt + ', as Measured'
-            if platform.node().startswith('jupyter'):
-                if cfg.plot_fKDE == True:
-                    figtxt_lcn = 0.85
-                else:
-                    figtxt_lcn = 0.86
-            else:
-                if cfg.plot_fKDE == True:
-                    figtxt_lcn = 0.84
-                else:
-                    figtxt_lcn = 0.85
         if subset == 'b':
             suptxt = suptxt + ', $p$ Densities'
-            if platform.node().startswith('jupyter'):
-                figtxt_lcn = 0.82
-            else:
-                figtxt_lcn = 0.81
         if subset == 'c':
             suptxt = suptxt + ", '-ary'"
-            if platform.node().startswith('jupyter'):
-                figtxt_lcn = 0.86
-            else:
-                figtxt_lcn = 0.85
-                
         plt.suptitle(suptxt, fontsize=14)
         plt.title(f'{ilrun}, $z$ = {glb.zs[dictnum][snapnum]:.1f}, '
                   f'$\mu$ = {mu_min}-{mu_max}')
@@ -3515,7 +3508,7 @@ def createfvm_mlt_plot():
 
 def createfvmratioplot(ilnums, zs_ratio, mu_maxes, virtualprogs, SubLink_gals,
                        Trefs, Tfacs, pds, dfvs, values, ratios, values_avg, 
-                       ratios_avg, toy):
+                       ratios_avg, toy, all_param):
     """
     Create a plot showing ratio of total to multiple mergers, using either
     measured values, or those based on probability densities. 
@@ -3551,6 +3544,8 @@ def createfvmratioplot(ilnums, zs_ratio, mu_maxes, virtualprogs, SubLink_gals,
         Ratio of multiple to total values used to compute average line.
     toy: boolean
         Toy Poisson plot formatting if true, as-measured if not.
+    all_param: boolean
+        Data from runs using all parameters if true, individual runs if not.
     """
 
     print(f'Creating f vs m ratio plot at ilnums {ilnums} zs {zs_ratio} '
@@ -3616,7 +3611,8 @@ def createfvmratioplot(ilnums, zs_ratio, mu_maxes, virtualprogs, SubLink_gals,
             if len(binned_ratios[i]) > 0:
                 avg = sum(binned_ratios[i])/len(binned_ratios[i])
                 if ((cfg.ratio_axes_log == 1 and avg > cfg.ratio_log_avg_min
-                     and len(binned_ratios[i]) >= cfg.ratio_log_avg_len_min)
+                     and (len(binned_ratios[i]) >= cfg.ratio_log_avg_len_min
+                          or all_param == 0))
                     or cfg.ratio_axes_log == 0):
                         bin_avgs[i] = avg
         if cfg.debug == 1: logging.debug(f'bin_avgs {bin_avgs}')
@@ -3667,7 +3663,7 @@ def createfvmratioplot(ilnums, zs_ratio, mu_maxes, virtualprogs, SubLink_gals,
         plt.figtext(0.93, 0.4, figtxt)
     
     # plot lines, if toy Poisson plot
-    if toy  == True:
+    if toy == True:
         plt.plot([0, 1], [0, 0.5], '-.k')
         if cfg.ratio_axes_log == 1:
             mask = np.ma.masked_invalid(bin_avgs).mask
@@ -3988,15 +3984,15 @@ def createfvmratioplots():
             createfvmratioplot([ilnum], zs_ratio, cfg.mu_maxes_to_plot_mlt,
                                 [virtualprog], [SubLink_gal], [Tref], [Tfac],
                                 [0], [], rsPD0dfv0r0, rsPD0dfv0r1,
-                                rsPD0dfv0r0, rsPD0dfv0r1, 0)
+                                rsPD0dfv0r0, rsPD0dfv0r1, 0, 0)
             createfvmratioplot([ilnum], zs_ratio, cfg.mu_maxes_to_plot_mlt,
                                 [virtualprog], [SubLink_gal], [Tref], [Tfac],
                                 [1], [0], rsPD1dfv0r0, rsPD1dfv0r1,
-                                rsPD0dfv0r0, rsPD0dfv0r1, 1)
+                                rsPD0dfv0r0, rsPD0dfv0r1, 1, 0)
             createfvmratioplot([ilnum], zs_ratio, cfg.mu_maxes_to_plot_mlt,
                                 [virtualprog], [SubLink_gal], [Tref], [Tfac],
                                 [1], [1], rsPD1dfv1r0, rsPD1dfv1r1,
-                                rsPD0dfv0r0, rsPD0dfv0r1, 1)
+                                rsPD0dfv0r0, rsPD0dfv0r1, 1, 0)
     
     # create ratio plot from results using all parameters
     if zsOG != [] and zsTNG != [] and zsOG != zsTNG:
@@ -4018,12 +4014,12 @@ def createfvmratioplots():
                        cfg.virtualprogs_to_plot_mlt,
                        cfg.SubLink_gals_to_plot_mlt,
                        cfg.Trefs_to_plot_mlt, cfg.Tfacs_to_plot_mlt,
-                       [0], [], rsPD0r0, rsPD0r1, rsPD0r0, rsPD0r1, 0)
+                       [0], [], rsPD0r0, rsPD0r1, rsPD0r0, rsPD0r1, 0, 1)
     createfvmratioplot(cfg.ilnums_mlt, zs_ratio, cfg.mu_maxes_to_plot_mlt, 
                        cfg.virtualprogs_to_plot_mlt,
                        cfg.SubLink_gals_to_plot_mlt, 
                        cfg.Trefs_to_plot_mlt, cfg.Tfacs_to_plot_mlt,
-                       [1], [0, 1], rsPD1r0, rsPD1r1, rsPD0r0, rsPD0r1, 1)
+                       [1], [0, 1], rsPD1r0, rsPD1r1, rsPD0r0, rsPD0r1, 1, 1)
     
 def create_dt1d_plot(
         ilnum, snapnum, mu_min, mu_max, virtualprog, SubLink_gal, Tref, Tfac,
@@ -4173,32 +4169,14 @@ def create_dt1d_plot(
         KDEtxt = ''
         if cml == 0 and nrm == 1:
             KDEtxt = f'$f_{{KDE}}$: {fKDE:0.3f}\n'
-            
         if platform.node().startswith('jupyter'):
-            figtxt_y = 0.10
-            if cml == 0:
-                if nrm == 0:
-                    figtxt_x = 0.83
-                else:
-                    figtxt_x = 0.79
-            else:
-                if nrm == 0:
-                    figtxt_x = 0.98
-                else:
-                    figtxt_x = 0.79
+            figtxt_y = 0.11
         else:
-            figtxt_y = 0.12
-            if cml == 0:
-                if nrm == 0:
-                    figtxt_x = 1
-                else:
-                    figtxt_x = 1
+            if cml == 0 and nrm == 1:
+                figtxt_y = 0.07
             else:
-                if nrm == 0:
-                    figtxt_x = 1
-                else:
-                    figtxt_x = 1
-        
+                figtxt_y = 0.14
+        figtxt_x = 1
         fvtxt = f'$f_{{v, 1c}}$: {fvld1c:0.2f}'
         if cl == 2:
             fvtxt += f'; $f_{{v, 2c}}$: {fvld2c:0.2f}'
@@ -4268,8 +4246,8 @@ def create_dt1d_plot(
                              f's{SubLink_gal:01d}Tr{Tref[0]}Tf{Tfac:0.1f}'
                              f'cl{cl}c{cml}n{nrm}ml{m_edge_lo:2.2f}'
                              f'mh{m_edge_hi:2.2f}ss{cfg.subhalostart}'
-                             f'se{cfg.subhalo_end}.'
-                             +plt_ext), format=plt_fmt, dpi=plt_dpi)
+                             f'se{cfg.subhalo_end}.'+plt_ext), 
+                format=plt_fmt, dpi=plt_dpi, bbox_inches='tight')
     if cfg.plot_toconsole == True:
         plt.show()
     plt.clf()
@@ -4647,6 +4625,9 @@ def create_single_dtplots():
                         f'{SubLink_gal} Tref {Tref} Tfac {Tfac} mbin_num '
                         f'{mbin_num} dt_edges\n{dt_edges}\ndt_ctrs\n{dt_ctrs}'
                         f'\ndts_2dc1\n{dts_2dc1}\ndts_2dc2\n{dts_2dc2}')
+                if len(dts_2dc1) == 0 and len(dts_2dc2) == 0:
+                    print("No values to plot; going to next plot")
+                    continue
                 create_dt2d_plot(
                         ilnum, snapnum, 1/mu_max, mu_max, virtualprog,
                         SubLink_gal, Tref, Tfac, m_edges[mbin_num],
@@ -4657,7 +4638,7 @@ def create_all_dt2dplot():
     Create one dt 2D plot, with data from all input parameters.
     """
 
-    print('Running create_all_dt2dplot, at ilnums {cfg.ilnums_mlt} '
+    print(f'Running create_all_dt2dplot, at ilnums {cfg.ilnums_mlt} '
           f'OG snaps {cfg.snapnumsOGmlt} TNG snaps {cfg.snapnumsTNGmlt} '
           f'mu_maxes {cfg.mu_maxes_to_plot_mlt} '
           f'virtualprogs {cfg.virtualprogs_to_plot_mlt} '
@@ -4851,7 +4832,7 @@ def create_all_dt2dplot():
         if cfg.debug == 1: logging.debug(f'dts_2dmlt {dts_2dmlt} ')
         
         # error checking
-        if dts_2dmlt.shape != i_dts:
+        if dts_2dmlt.shape[0] != i_dts:
             raise Exception(f'dts_2dmlt.shape ({dts_2dmlt.shape}) != '
                             f'i_dts ({i_dts})')
 
@@ -4942,8 +4923,8 @@ def create_all_dt2dplot():
                              f'mv{cfg.mminvirt:1.2f}mb{cfg.mbinsnumraw}'
                              f'mt{cfg.mmrglst3}ml{cfg.mlogspace}mbtp{mbfn}'
                              f'do{cfg.dtbinwdthopt:1.1f}ss{cfg.subhalostart}'
-                             f'se{cfg.subhalo_end}.'
-                             +plt_ext), format=plt_fmt, dpi=plt_dpi)
+                             f'se{cfg.subhalo_end}.'+plt_ext),
+                format=plt_fmt, dpi=plt_dpi, bbox_inches='tight')
     if cfg.plot_toconsole == True:
         plt.show()
     plt.clf()
@@ -4962,15 +4943,19 @@ def createpubplots():
     createfvmratioplots()
     create_single_dtplots()
     create_all_dt2dplot()
+
+def analyze_undercount():
+    """
+    Analyze mergers for potential undercount of multiple ones.
+
+    Returns
+    -------
+    None.
+
+    """
     
-def test():
-    """
-    Test code.
-    """
-
-    print('Running test')
-
-    # test how many single mergers could be multiple mergers
+    print('Running analyze_undercount')
+    
     # ilnum = 3
     ilnum = 100
     # snap_ctr = 75
@@ -5191,7 +5176,15 @@ def test():
           'Fraction 3 (sum(p_(undercount)) / sum(p_(multiple, analysis)): '
           f'{f3}')
     
-    # pass
+    
+def test():
+    """
+    Test code.
+    """
+
+    print('Running test')
+    
+    pass
     
 
 if __name__ == '__main__':

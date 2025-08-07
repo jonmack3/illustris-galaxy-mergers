@@ -35,10 +35,11 @@ functions = {0: 'setmergers',
              13: 'create_single_dtplots',
              14: 'create_all_dt2dplot',
              15: 'createpubplots',
-             16: 'test'}
+             16: 'analyze_undercount',
+             17: 'test'}
 
 testcfg = 0
-fnum = 2
+fnum = 15
 
 if not testcfg:
     debug = 0
@@ -50,10 +51,10 @@ if not testcfg:
     fxs_num = 500
     setmergers_arylen = 1000000
 
-    ilnums = [3]
+    ilnums = [100]
     # ilnums_mlt = [3, 100]
     ilnums_mlt = [1, 3, 100, 300]
-    snapnumsOG = [68]
+    snapnumsOG = []
     # snapnumsOGmlt = [68]
     snapnumsOGmlt = [49, 54, 60, 64, 68, 75, 85, 103, 120, 127]
     snapnumsTNG = [33]
@@ -82,7 +83,7 @@ else:
     
     ilnums = [3]
     ilnums_mlt = [1, 3, 100, 300]
-    snapnumsOG = [76]
+    snapnumsOG = [68]
     snapnumsOGmlt = [49, 54, 60, 64, 68, 75, 85, 103, 120, 127]
     snapnumsTNG = []
     snapnumsTNGmlt = [17, 21, 25, 29, 33, 40, 50, 67, 84, 91]
@@ -126,8 +127,8 @@ plot_toconsole = 0
 plot_tofile = 1
 ploterrorbars = 1
 
-plotcml = 0
-plot_fKDE = 0
+plotcml = 1
+plot_fKDE = 1
 mu_maxes_to_plot = [4]
 # mu_maxes_to_plot = [2, 4, 10]
 # mu_maxes_to_plot_mlt = [2]
@@ -140,19 +141,21 @@ SubLink_gals_to_plot = [1]
 # SubLink_gals_to_plot = [0, 1]
 # SubLink_gals_to_plot_mlt = [1]
 SubLink_gals_to_plot_mlt = [0, 1]
-# Trefs_to_plot = ['merger']
-Trefs_to_plot = ['analysis', 'merger']
+Trefs_to_plot = ['merger']
+# Trefs_to_plot = ['analysis', 'merger']
 # Trefs_to_plot_mlt = ['merger']
 Trefs_to_plot_mlt = ['analysis', 'merger']
 Tfacs_to_plot = [1]
-# Tfacs_to_plot_mlt = [2]
+# Tfacs_to_plot = [0.5, 1, 2]
+# Tfacs_to_plot_mlt = [1]
 Tfacs_to_plot_mlt = [0.5, 1, 2]
-Tfacs_to_plot_dt = [0.5, 1, 2]
+Tfacs_to_plot_dt = [2]
+# Tfacs_to_plot_dt = [0.5, 1, 2]
 ratio_numbins = 50
 ratio_plt_avgs = 1
 ratio_axes_log = 1
 ratio_log_min = 3e-3
 ratio_log_avg_min = 0.01
 ratio_log_avg_len_min = 25
-dt_mbins_to_plot = [-1] # include -1 in list to plot all mass bins
+dt_mbins_to_plot = [2] # include -1 in list to plot all mass bins
 dt_mbins_to_plot_mlt = [-1] # include -1 in list to plot all mass bins
