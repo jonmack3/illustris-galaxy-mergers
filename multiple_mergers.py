@@ -2916,7 +2916,7 @@ def createfvmplot(ilnum, snapnum, mu_min, mu_max, virtualprog, SubLink_gal,
                 yerrs = (errs[i]['e_rel_lo'], errs[i]['e_rel_hi'])
                 
             plt.errorbar(m_ctrs*10**10, ydat, yerr=yerrs, alpha=line_alpha,
-                         capsize=4, color=linecolor, errorevery=2,
+                         capsize=4, color=linecolor, 
                          label=namedict[fdat[i]['name']], ls='None',
                          marker=markershape, markerfacecolor=markerfill,
                          markersize=mrkrsize)
@@ -4940,9 +4940,9 @@ def createpubplots():
     plt.rcParams.update({'font.size': 12})
     createfvmplots()
     createfvm_mlt_plot()
-    createfvmratioplots()
-    create_single_dtplots()
-    create_all_dt2dplot()
+    # createfvmratioplots()
+    # create_single_dtplots()
+    # create_all_dt2dplot()
 
 def analyze_undercount():
     """
